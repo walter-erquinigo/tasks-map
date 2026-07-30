@@ -14,6 +14,11 @@ valid task is a graph node by default. The existing "Hide unlinked tasks"
 control remains available and can restore the upstream behavior for the
 current view.
 
+It also treats a task nested directly below another task as implicitly blocked
+by that parent. These inferred dependencies are rendered in the graph without
+adding dependency metadata to the Markdown source. Explicit dependencies are
+preserved and deduplicated with inferred ones.
+
 The plugin keeps the upstream `tasks-map` ID because the view resolves its
 plugin instance by that ID.
 

@@ -1,9 +1,9 @@
 {
     "id": "tasks-map",
     "name": "Tasks Map (All Tasks)",
-    "version": "0.36.2",
+    "version": "0.36.3",
     "minAppVersion": "1.8.0",
-    "description": "A Tasks Map fork that shows standalone tasks on the graph by default.",
+    "description": "A Tasks Map fork that shows standalone tasks and infers dependencies from task nesting.",
     "author": "Walter Erquinigo, based on work by NicoKNL",
     "authorUrl": "https://github.com/walter-erquinigo",
     "isDesktopOnly": false

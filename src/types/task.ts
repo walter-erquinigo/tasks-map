@@ -9,6 +9,10 @@ export interface RawTask {
   status: string;
   text: string;
   link: { path: string };
+  /** Zero-based source line supplied by Dataview. */
+  line?: number;
+  /** Zero-based source line of the containing list item, when nested. */
+  parent?: number;
 }
 
 // Re-export BaseTask for convenience

@@ -13,6 +13,7 @@ import { AppWithPlugins } from "src/types/obsidian-internals";
 import { BaseTask, TaskInsertPosition } from "src/types/base-task";
 import { NODEHEIGHT, NODEWIDTH } from "src/components/task-node";
 import { TaskFactory } from "./task-factory";
+import { addImplicitNestingDependencies } from "./task-hierarchy";
 import { Position, Node, Edge } from "reactflow";
 import { t } from "../i18n";
 import { TagColorPalette } from "./tag-color-manager";
@@ -1468,10 +1469,18 @@ export function getAllDataviewTasks(app: App): BaseTask[] {
     }
   }
   const factory = new TaskFactory();
-  const parsedTasks = tasks.map((rawTask) => factory.parse(rawTask));
 
-  // Filter out empty tasks (tasks with no meaningful content after stripping metadata)
-  return parsedTasks.filter((task) => !factory.isEmptyTask(task));
+  // Filter out tasks with no meaningful content after stripping metadata.
+  const parsedTaskEntries = tasks
+    .map((rawTask) => ({
+      rawTask,
+      task: factory.parse(rawTask),
+    }))
+    .filter(({ task }) => !factory.isEmptyTask(task));
+
+  addImplicitNestingDependencies(parsedTaskEntries);
+
+  return parsedTaskEntries.map(({ task }) => task);
 }
 
 export function getNoteTasks(app: App): BaseTask[] {

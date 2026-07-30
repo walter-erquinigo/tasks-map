@@ -19,6 +19,9 @@ by that parent. These inferred dependencies are rendered in the graph without
 adding dependency metadata to the Markdown source. Explicit dependencies are
 preserved and deduplicated with inferred ones.
 
+Task node summaries use only the task's first line. Indented continuation text
+remains available in the Markdown note without appearing in the graph node.
+
 The plugin keeps the upstream `tasks-map` ID because the view resolves its
 plugin instance by that ID.
 

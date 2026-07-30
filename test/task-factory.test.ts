@@ -290,6 +290,16 @@ describe("TaskFactory", () => {
       expect(summary).not.toContain("scheduled");
       expect(summary).not.toContain("2026");
     });
+
+    it("excludes continuation text below the task line", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Parent task 🆔 parent\n    A nested comment with details",
+        link: { path: "t.md" },
+      };
+
+      expect(factory.parse(raw).summary).toBe("Parent task");
+    });
   });
 
   describe("text cleaning", () => {

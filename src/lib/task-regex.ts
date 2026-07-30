@@ -22,6 +22,11 @@ export const DATAVIEW_BRACKET_DEPENDS_PATTERN =
 export const DATAVIEW_PARENTHESES_DEPENDS_PATTERN =
   /\(dependsOn::\s*([a-zA-Z0-9_-]+(?:,\s*[a-zA-Z0-9_-]+)*)\)/g;
 
+// Owner patterns. The emoji shorthand is suffix-only so names may contain spaces.
+export const DATAVIEW_OWNER_PATTERN = /\[owner::\s*([^\]]+?)\s*\]/gi;
+export const OWNER_EMOJI_PATTERN =
+  /(?:^|\s)👤\s+([^\p{Extended_Pictographic}\x5b\x5d()#]+?)\s*$/u;
+
 // Date field names recognized by the Tasks plugin / Dataview
 export const DATE_FIELD_NAMES =
   "due|scheduled|start|created|completion|done|canceled|cancelled";

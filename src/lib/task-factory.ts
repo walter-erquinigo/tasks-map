@@ -18,6 +18,8 @@ import {
   DATAVIEW_PARENTHESES_DEPENDS_PATTERN,
   DATAVIEW_DATE_FIELD_REMOVAL,
   TEXT_DATE_FIELD_REMOVAL,
+  DATAVIEW_OWNER_PATTERN,
+  OWNER_EMOJI_PATTERN,
   STAR_PATTERN,
   STAR_PATTERN_GLOBAL,
 } from "./task-regex";
@@ -35,6 +37,7 @@ export class TaskFactory {
   ): BaseTask {
     const status = rawTask.status;
     const text = rawTask.text;
+    const ownerMetadata = this.parseOwner(text);
 
     const taskData = {
       id: this.parseIdFromText(text),
@@ -46,6 +49,8 @@ export class TaskFactory {
       link: rawTask.link.path,
       incomingLinks: this.parseIncomingLinks(text),
       starred: this.parseStarred(text),
+      owner: ownerMetadata.owner,
+      ownerConflict: ownerMetadata.conflict,
     };
 
     // Return the appropriate subclass based on type
@@ -92,6 +97,30 @@ export class TaskFactory {
 
   private parseStarred(text: string): boolean {
     return STAR_PATTERN.test(text);
+  }
+
+  private parseOwner(text: string): { owner: string; conflict: boolean } {
+    const taskLine = this.cleanText(text);
+    const dataviewOwners = Array.from(taskLine.matchAll(DATAVIEW_OWNER_PATTERN))
+      .map((match) => match[1].trim())
+      .filter((owner) => owner.length > 0);
+    const emojiOwner = taskLine.match(OWNER_EMOJI_PATTERN)?.[1]?.trim();
+    const owners = emojiOwner
+      ? [...dataviewOwners, emojiOwner]
+      : dataviewOwners;
+
+    if (owners.length === 0) {
+      return { owner: "", conflict: false };
+    }
+
+    const normalizedOwners = new Set(
+      owners.map((owner) => owner.toLowerCase())
+    );
+
+    return {
+      owner: dataviewOwners[0] ?? emojiOwner ?? "",
+      conflict: normalizedOwners.size > 1,
+    };
   }
 
   private parseTags(text: string): string[] {
@@ -180,6 +209,8 @@ export class TaskFactory {
       .replace(DATAVIEW_PARENTHESES_DEPENDS_PATTERN, "") // Remove Dataview dependencies: (dependsOn:: abc123,def456)
       .replace(DATAVIEW_DATE_FIELD_REMOVAL, "") // Remove Dataview dates: [due:: 2025-01-01]
       .replace(TEXT_DATE_FIELD_REMOVAL, "") // Remove plain-text dates: due:2025-01-01
+      .replace(DATAVIEW_OWNER_PATTERN, "") // Remove Dataview owner: [owner:: Name]
+      .replace(OWNER_EMOJI_PATTERN, "") // Remove suffix owner alias: 👤 Name
       .replace(STAR_PATTERN_GLOBAL, "") // Remove star emoji: ⭐
       .replace(/([\p{Extended_Pictographic}]+(\s*[#a-zA-Z0-9_-]+)?)/gu, "") // Remove other emojis
       .replace(/([\p{Extended_Pictographic}]+)/gu, "") // Remove remaining emojis

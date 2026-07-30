@@ -330,6 +330,37 @@ If your plugin does not need CSS, delete this file.
   padding-bottom: 4px;
 }
 
+.tasks-map-task-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-height: 20px;
+  padding: 2px 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.tasks-map-task-owner svg {
+  flex: 0 0 auto;
+}
+
+.tasks-map-task-owner-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tasks-map-task-owner--conflict {
+  border-color: var(--text-error);
+  color: var(--text-error);
+}
+
 .tasks-map-task-node-footer {
   border-top: 1px solid var(--tasks-map-node-divider);
   width: calc(100% + 24px);

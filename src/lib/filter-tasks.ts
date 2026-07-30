@@ -59,6 +59,7 @@ const applySearchFilter = (
   return tasks.filter(
     (task) =>
       task.summary.toLowerCase().includes(lowerQuery) ||
+      task.owner.toLowerCase().includes(lowerQuery) ||
       task.id.toLowerCase().includes(lowerQuery) ||
       task.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
   );

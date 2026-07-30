@@ -127,6 +127,10 @@
     "done": "Done",
     "canceled": "Canceled"
   },
+  "task_owner": {
+    "label": "Owner: {{owner}}",
+    "conflict": "Conflicting owner metadata for {{owner}}"
+  },
   "edge_actions": {
     "delete_edge": "Delete edge",
     "insert_task": "Insert task"

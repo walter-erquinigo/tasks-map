@@ -11,6 +11,7 @@ function makeTask(overrides: {
   link?: string;
   incomingLinks?: string[];
   starred?: boolean;
+  owner?: string;
 }): NoteTask {
   return new NoteTask({
     id: overrides.id,
@@ -22,6 +23,7 @@ function makeTask(overrides: {
     link: overrides.link ?? `tasks/${overrides.id}.md`,
     incomingLinks: overrides.incomingLinks ?? [],
     starred: overrides.starred ?? false,
+    owner: overrides.owner ?? "",
   });
 }
 
@@ -191,6 +193,20 @@ describe("getFilteredNodeIds", () => {
         filter({ searchQuery: "backend" })
       );
       expect(result).toEqual(["T2", "T5"]);
+    });
+
+    it("matches by owner", () => {
+      const ownedTasks = [
+        makeTask({ id: "T1", owner: "Gibran" }),
+        makeTask({ id: "T2", owner: "Walter" }),
+      ];
+
+      const result = getFilteredNodeIds(
+        ownedTasks,
+        filter({ searchQuery: "gib" })
+      );
+
+      expect(result).toEqual(["T1"]);
     });
 
     it("is case-insensitive", () => {

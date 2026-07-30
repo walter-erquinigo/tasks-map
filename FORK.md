@@ -22,6 +22,12 @@ preserved and deduplicated with inferred ones.
 Task node summaries use only the task's first line. Indented continuation text
 remains available in the Markdown note without appearing in the graph node.
 
+Owners can be written canonically as `[owner:: Gibran]` or with the suffix
+shorthand `👤 Gibran`. Both forms produce the same owner badge and are removed
+from the node title. The emoji shorthand must be the final metadata on the task
+line so multi-word names remain unambiguous. If both forms contain different
+owners, Tasks Map shows a conflict-styled badge and the Dataview value wins.
+
 The plugin keeps the upstream `tasks-map` ID because the view resolves its
 plugin instance by that ID.
 

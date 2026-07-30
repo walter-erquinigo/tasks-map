@@ -25,6 +25,9 @@ export function TaskDetails({ task, status }: TaskDetailsProps) {
         <b>Priority:</b> {task.priority}
       </div>
       <div>
+        <b>Owner:</b> {task.owner || "-"}
+      </div>
+      <div>
         <b>Link:</b> {task.link}
       </div>
       <div>

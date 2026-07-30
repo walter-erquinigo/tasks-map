@@ -127,6 +127,10 @@
     "done": "Voltooid",
     "canceled": "Geannuleerd"
   },
+  "task_owner": {
+    "label": "Eigenaar: {{owner}}",
+    "conflict": "Tegenstrijdige eigenaarsmetadata voor {{owner}}"
+  },
   "edge_actions": {
     "delete_edge": "Verbinding verwijderen",
     "insert_task": "Taak invoegen"

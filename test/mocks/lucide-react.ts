@@ -6,3 +6,5 @@ export const Trash2 = jest.fn(() => null);
 export const ExternalLink = jest.fn(() => null);
 export const ChevronDown = jest.fn(() => null);
 export const ChevronRight = jest.fn(() => null);
+export const TriangleAlert = jest.fn(() => null);
+export const UserRound = jest.fn(() => null);

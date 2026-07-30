@@ -33,6 +33,7 @@ export default function UnlinkedTasksPanel({ tasks }: UnlinkedTasksPanelProps) {
     return tasks.filter(
       (task) =>
         task.summary.toLowerCase().includes(lower) ||
+        task.owner.toLowerCase().includes(lower) ||
         task.tags.some((tag) => tag.toLowerCase().includes(lower))
     );
   }, [tasks, filterQuery]);

@@ -19,6 +19,8 @@ export abstract class BaseTask {
   incomingLinks: string[];
   starred: boolean;
   projects: string[];
+  owner: string;
+  ownerConflict: boolean;
 
   constructor(data: {
     id: string;
@@ -31,6 +33,8 @@ export abstract class BaseTask {
     incomingLinks: string[];
     starred: boolean;
     projects?: string[];
+    owner?: string;
+    ownerConflict?: boolean;
   }) {
     this.id = data.id;
     this.summary = data.summary;
@@ -42,6 +46,8 @@ export abstract class BaseTask {
     this.incomingLinks = data.incomingLinks;
     this.starred = data.starred;
     this.projects = data.projects ?? [];
+    this.owner = data.owner ?? "";
+    this.ownerConflict = data.ownerConflict ?? false;
   }
 
   /**
@@ -113,6 +119,8 @@ export abstract class BaseTask {
       incomingLinks: this.incomingLinks,
       starred: this.starred,
       projects: this.projects,
+      owner: this.owner,
+      ownerConflict: this.ownerConflict,
     };
   }
 }

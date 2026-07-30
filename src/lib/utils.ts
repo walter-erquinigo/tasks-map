@@ -116,12 +116,19 @@ export function estimateNodeDimensions(
     tagsHeight = tagRows * 28;
   }
 
+  const ownerHeight = task.owner ? 24 : 0;
+
   // Add padding and safety margin
   const padding = 24; // 12px top + 12px bottom
   const safetyMargin = 16; // Extra buffer to prevent overlap
 
   const totalHeight =
-    baseHeight + summaryHeight + tagsHeight + padding + safetyMargin;
+    baseHeight +
+    summaryHeight +
+    ownerHeight +
+    tagsHeight +
+    padding +
+    safetyMargin;
 
   return {
     width: baseWidth,

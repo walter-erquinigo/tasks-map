@@ -127,6 +127,10 @@
     "done": "完成",
     "canceled": "取消"
   },
+  "task_owner": {
+    "label": "负责人：{{owner}}",
+    "conflict": "{{owner}} 的负责人元数据存在冲突"
+  },
   "edge_actions": {
     "delete_edge": "删除连线",
     "insert_task": "插入任务"

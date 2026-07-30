@@ -439,6 +439,15 @@ describe("estimateNodeDimensions", () => {
     const withoutTags = estimateNodeDimensions(task, false);
     expect(withTags.height).toBe(withoutTags.height);
   });
+
+  it("adds height for an owner badge", () => {
+    const withoutOwner = estimateNodeDimensions(makeTask({ owner: "" }));
+    const withOwner = estimateNodeDimensions(
+      makeTask({ owner: "Walter Erquinigo" })
+    );
+
+    expect(withOwner.height).toBeGreaterThan(withoutOwner.height);
+  });
 });
 
 describe("createNodesFromTasks", () => {

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 import { setTooltip } from "obsidian";
-import { Plus } from "lucide-react";
+import { Plus, TriangleAlert, UserRound } from "lucide-react";
 import { useApp } from "src/hooks/hooks";
 import { BaseTask } from "src/types/task";
 import { TaskDetails } from "./task-details";
@@ -87,6 +87,34 @@ interface TaskNodeData {
   // eslint-disable-next-line no-unused-vars -- callback parameter convention
   onTaskCreated?: (_newTask: BaseTask) => void;
   onTaskEdited?: (_taskId: string, _updatedTask: BaseTask) => void;
+}
+
+interface TaskOwnerProps {
+  owner: string;
+  conflict: boolean;
+}
+
+function TaskOwner({ owner, conflict }: TaskOwnerProps) {
+  const label = conflict
+    ? t("task_owner.conflict", { owner })
+    : t("task_owner.label", { owner });
+
+  return (
+    <span
+      className={`tasks-map-task-owner${
+        conflict ? " tasks-map-task-owner--conflict" : ""
+      }`}
+      aria-label={label}
+      title={label}
+    >
+      {conflict ? (
+        <TriangleAlert size={12} aria-hidden="true" />
+      ) : (
+        <UserRound size={12} aria-hidden="true" />
+      )}
+      <span className="tasks-map-task-owner-name">{owner}</span>
+    </span>
+  );
 }
 
 export default function TaskNode({ data, selected }: NodeProps<TaskNodeData>) {
@@ -292,6 +320,9 @@ export default function TaskNode({ data, selected }: NodeProps<TaskNodeData>) {
 
         <div className="tasks-map-task-node-content">
           <span ref={summaryRef} className="tasks-map-task-node-summary" />
+          {task.owner && (
+            <TaskOwner owner={task.owner} conflict={task.ownerConflict} />
+          )}
         </div>
 
         {showTags && (

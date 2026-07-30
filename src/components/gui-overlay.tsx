@@ -65,6 +65,7 @@ export default function GuiOverlay(props: GuiOverlayProps) {
       .filter(
         (task) =>
           task.summary.toLowerCase().includes(lowerQuery) ||
+          task.owner.toLowerCase().includes(lowerQuery) ||
           task.id.toLowerCase().includes(lowerQuery) ||
           task.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
       )

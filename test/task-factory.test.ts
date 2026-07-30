@@ -174,6 +174,103 @@ describe("TaskFactory", () => {
     });
   });
 
+  describe("owner parsing", () => {
+    it("parses the canonical Dataview owner field", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash [owner:: Gibran] 🆔 aaaaaa",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.owner).toBe("Gibran");
+      expect(task.ownerConflict).toBe(false);
+    });
+
+    it("parses a suffix emoji owner alias", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash 🆔 aaaaaa 👤 Gibran",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.owner).toBe("Gibran");
+      expect(task.ownerConflict).toBe(false);
+    });
+
+    it("parses an owner after ID and due-date metadata", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "JIRA:CTK-12906 🆔 CTK-12906 📅 2026-08-07 👤 Gibran",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.owner).toBe("Gibran");
+      expect(task.summary).toBe("JIRA:CTK-12906");
+    });
+
+    it("supports multi-word names in the emoji alias", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash 👤 Walter Erquinigo",
+        link: { path: "t.md" },
+      };
+
+      expect(factory.parse(raw).owner).toBe("Walter Erquinigo");
+    });
+
+    it("deduplicates equivalent aliases case-insensitively", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash [owner:: Gibran] 👤 gibran",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.owner).toBe("Gibran");
+      expect(task.ownerConflict).toBe(false);
+    });
+
+    it("flags conflicting aliases and keeps the canonical owner", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash [owner:: Gibran] 👤 Walter",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.owner).toBe("Gibran");
+      expect(task.ownerConflict).toBe(true);
+    });
+
+    it("requires the emoji alias to be the final metadata", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash 👤 Gibran 🆔 aaaaaa",
+        link: { path: "t.md" },
+      };
+
+      expect(factory.parse(raw).owner).toBe("");
+    });
+
+    it("returns an empty owner when metadata is absent", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "Investigate crash 🆔 aaaaaa",
+        link: { path: "t.md" },
+      };
+
+      expect(factory.parse(raw).owner).toBe("");
+    });
+  });
+
   describe("incoming links parsing", () => {
     it("parses individual-style links", () => {
       const raw: RawTask = {
@@ -299,6 +396,20 @@ describe("TaskFactory", () => {
       };
 
       expect(factory.parse(raw).summary).toBe("Parent task");
+    });
+
+    it.each([
+      ["Investigate crash [owner:: Gibran] 🆔 aaaaaa", "Investigate crash"],
+      ["Investigate crash 🆔 aaaaaa 👤 Gibran", "Investigate crash"],
+      ["Investigate crash [owner:: Gibran] 👤 Walter", "Investigate crash"],
+    ])("strips owner metadata from '%s'", (text, expected) => {
+      const raw: RawTask = {
+        status: " ",
+        text,
+        link: { path: "t.md" },
+      };
+
+      expect(factory.parse(raw).summary).toBe(expected);
     });
   });
 

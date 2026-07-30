@@ -1,5 +1,5 @@
 import { TaskStatus, RawTask } from "src/types/task";
-import { BaseTask } from "src/types/base-task";
+import { BaseTask, TaskIdOrigin } from "src/types/base-task";
 import { DataviewTask } from "src/types/dataview-task";
 import { NoteTask } from "src/types/note-task";
 
@@ -22,6 +22,7 @@ import {
   OWNER_EMOJI_PATTERN,
   STAR_PATTERN,
   STAR_PATTERN_GLOBAL,
+  JIRA_TASK_ID_PATTERN,
 } from "./task-regex";
 
 const ID_MATCH_PATTERNS = [
@@ -38,9 +39,11 @@ export class TaskFactory {
     const status = rawTask.status;
     const text = rawTask.text;
     const ownerMetadata = this.parseOwner(text);
+    const idMetadata = this.parseIdFromText(text);
 
     const taskData = {
-      id: this.parseIdFromText(text),
+      id: idMetadata.id,
+      idOrigin: idMetadata.origin,
       summary: this.makeSummary(text),
       text: this.cleanText(text),
       tags: this.parseTags(text),
@@ -71,17 +74,26 @@ export class TaskFactory {
     return text.split("\n")[0].trim();
   }
 
-  private parseIdFromText(text: string): string {
+  private parseIdFromText(text: string): {
+    id: string;
+    origin: TaskIdOrigin;
+  } {
     for (const idPattern of ID_MATCH_PATTERNS) {
       const idMatch = text.match(idPattern);
       if (idMatch) {
-        return idMatch[1];
+        return { id: idMatch[1], origin: "explicit" };
       }
     }
 
-    return Array.from({ length: 6 }, () =>
+    const jiraMatch = this.cleanText(text).match(JIRA_TASK_ID_PATTERN);
+    if (jiraMatch) {
+      return { id: jiraMatch[1].toUpperCase(), origin: "jira" };
+    }
+
+    const id = Array.from({ length: 6 }, () =>
       Math.floor(Math.random() * 36).toString(36)
     ).join("");
+    return { id, origin: "generated" };
   }
 
   private parsePriority(text: string): string {

@@ -28,6 +28,12 @@ from the node title. The emoji shorthand must be the final metadata on the task
 line so multi-word names remain unambiguous. If both forms contain different
 owners, Tasks Map shows a conflict-styled badge and the Dataview value wins.
 
+Tasks whose text begins with `JIRA:TILE-1234`, `JIRA:NVVM-1234`, or
+`JIRA:CTK-1234` use that Jira key as their task ID. The ID is virtual: creating
+a dependency writes the key to the blocked task but does not add redundant ID
+metadata to the Jira task. An explicit `🆔`, `[id::]`, or `(id::)` value still
+takes precedence.
+
 The plugin keeps the upstream `tasks-map` ID because the view resolves its
 plugin instance by that ID.
 

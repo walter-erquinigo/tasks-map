@@ -50,7 +50,9 @@ describe("TaskFactory", () => {
         text: "Do the thing 🆔 abc123",
         link: { path: "t.md" },
       };
-      expect(factory.parse(raw).id).toBe("abc123");
+      const task = factory.parse(raw);
+      expect(task.id).toBe("abc123");
+      expect(task.idOrigin).toBe("explicit");
     });
 
     it("extracts dataview bracket-format ID", () => {
@@ -71,6 +73,65 @@ describe("TaskFactory", () => {
       expect(factory.parse(raw).id).toBe("pqr456");
     });
 
+    it.each(["TILE-1234", "NVVM-5678", "CTK-9012"])(
+      "uses a leading JIRA:%s marker as a virtual ID",
+      (jiraId) => {
+        const raw: RawTask = {
+          status: " ",
+          text: `JIRA:${jiraId}`,
+          link: { path: "t.md" },
+        };
+
+        const task = factory.parse(raw);
+
+        expect(task.id).toBe(jiraId);
+        expect(task.idOrigin).toBe("jira");
+      }
+    );
+
+    it("normalizes a Jira-derived ID to uppercase", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "jira:tile-1234 [owner:: Gibran]",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.id).toBe("TILE-1234");
+      expect(task.idOrigin).toBe("jira");
+      expect(task.owner).toBe("Gibran");
+    });
+
+    it("keeps an explicit ID when a leading Jira marker is also present", () => {
+      const raw: RawTask = {
+        status: " ",
+        text: "JIRA:TILE-1234 🆔 custom-id",
+        link: { path: "t.md" },
+      };
+
+      const task = factory.parse(raw);
+
+      expect(task.id).toBe("custom-id");
+      expect(task.idOrigin).toBe("explicit");
+    });
+
+    it.each(["TILE-1234", "Fix JIRA:TILE-1234"])(
+      "does not infer a Jira ID from '%s'",
+      (text) => {
+        const raw: RawTask = {
+          status: " ",
+          text,
+          link: { path: "t.md" },
+        };
+
+        const task = factory.parse(raw);
+
+        expect(task.id).toHaveLength(6);
+        expect(task.idOrigin).toBe("generated");
+      }
+    );
+
     it("generates a random 6-char ID when no ID is present", () => {
       const raw: RawTask = {
         status: " ",
@@ -80,6 +141,7 @@ describe("TaskFactory", () => {
       const task = factory.parse(raw);
       expect(task.id).toHaveLength(6);
       expect(task.id).toMatch(/^[a-z0-9]+$/);
+      expect(task.idOrigin).toBe("generated");
     });
   });
 

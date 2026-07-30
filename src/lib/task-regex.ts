@@ -7,6 +7,9 @@ export const EMOJI_ID_PATTERN = /🆔\s*([a-zA-Z0-9_-]+)/i;
 export const DATAVIEW_BRACKET_ID_PATTERN = /\[id::\s*([a-zA-Z0-9_-]+)\]/i;
 export const DATAVIEW_PARENTHESES_ID_PATTERN = /\(id::\s*([a-zA-Z0-9_-]+)\)/i;
 
+// Virtual Jira IDs are inferred only when the task text begins with JIRA:.
+export const JIRA_TASK_ID_PATTERN = /^JIRA:((?:TILE|NVVM|CTK)-\d+)\b/i;
+
 // ID patterns for removal/global replacement (with 'g' flag)
 export const EMOJI_ID_PATTERN_GLOBAL = /🆔\s*[a-zA-Z0-9_-]+/gi;
 export const DATAVIEW_BRACKET_ID_PATTERN_GLOBAL = /\[id::\s*[a-zA-Z0-9_-]+\]/gi;

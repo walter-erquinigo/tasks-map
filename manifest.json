@@ -1,9 +1,9 @@
 {
     "id": "tasks-map",
     "name": "Tasks Map (All Tasks)",
-    "version": "0.36.5",
+    "version": "0.36.6",
     "minAppVersion": "1.8.0",
-    "description": "A Tasks Map fork with standalone tasks, inferred nesting dependencies, and owner badges.",
+    "description": "A Tasks Map fork with standalone tasks, inferred dependencies, virtual Jira IDs, and owner badges.",
     "author": "Walter Erquinigo, based on work by NicoKNL",
     "authorUrl": "https://github.com/walter-erquinigo",
     "isDesktopOnly": false

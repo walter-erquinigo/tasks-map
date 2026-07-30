@@ -1210,8 +1210,8 @@ export async function addLinkSignsBetweenTasks(
 }
 
 /**
- * Modifies a task in its linked file by searching for the task text and replacing it with a new version
- * that adds a stop sign (⛔) or ID sign (🆔) with the provided 6-char hash.
+ * Modifies a task in its linked file by searching for the task text and adding
+ * dependency or ID metadata. Jira-derived IDs remain virtual.
  * @param vault: Obsidian vault instance
  * @param task: The task object (must have .link and .text)
  * @param type: 'stop' | 'id' - which sign to add
@@ -1224,6 +1224,7 @@ export async function addSignToTaskInFile(
   hash: string,
   linkingStyle: "individual" | "csv" | "dataview" = "individual"
 ): Promise<void> {
+  if (type === "id" && task.idOrigin === "jira") return;
   if (!task.link || !task.text) return;
   const file = vault.getAbstractFileByPath(task.link);
   if (!(file instanceof TFile)) return;
@@ -1235,8 +1236,8 @@ export async function addSignToTaskInFile(
 
     if (type === "id") {
       // Check if any ID format is already present
-      const emojiIdPresent = /🆔\s*[a-zA-Z0-9]{6}/.test(lines[taskLineIdx]);
-      const dataviewIdPresent = /\[id::\s*[a-zA-Z0-9]{6}\]/.test(
+      const emojiIdPresent = /🆔\s*[a-zA-Z0-9_-]+/.test(lines[taskLineIdx]);
+      const dataviewIdPresent = /\[id::\s*[a-zA-Z0-9_-]+\]/.test(
         lines[taskLineIdx]
       );
 
@@ -1257,15 +1258,15 @@ export async function addSignToTaskInFile(
       // Detect if task is using Dataview format (or if it's the configured style)
       const usesDataviewFormat =
         linkingStyle === "dataview" ||
-        /\[id::\s*[a-zA-Z0-9]{6}\]/.test(lines[taskLineIdx]) ||
-        /\[dependsOn::\s*[a-zA-Z0-9]{6}(?:,\s*[a-zA-Z0-9]{6})*\]/.test(
+        /\[id::\s*[a-zA-Z0-9_-]+\]/.test(lines[taskLineIdx]) ||
+        /\[dependsOn::\s*[a-zA-Z0-9_-]+(?:,\s*[a-zA-Z0-9_-]+)*\]/.test(
           lines[taskLineIdx]
         );
 
       if (usesDataviewFormat) {
         // Handle Dataview format dependencies
         const dataviewRegex =
-          /\[dependsOn::\s*([a-zA-Z0-9]{6}(?:,\s*[a-zA-Z0-9]{6})*)\]/;
+          /\[dependsOn::\s*([a-zA-Z0-9_-]+(?:,\s*[a-zA-Z0-9_-]+)*)\]/;
         const dataviewMatch = lines[taskLineIdx].match(dataviewRegex);
 
         if (dataviewMatch) {
@@ -1288,7 +1289,7 @@ export async function addSignToTaskInFile(
         // Handle emoji format stop signs based on linking style
         if (linkingStyle === "csv") {
           // Check if there's already a CSV-style stop sign
-          const csvRegex = /⛔\s*([a-zA-Z0-9]{6}(?:,[a-zA-Z0-9]{6})*)/;
+          const csvRegex = /⛔\s*([a-zA-Z0-9_-]+(?:,[a-zA-Z0-9_-]+)*)/;
           const csvMatch = lines[taskLineIdx].match(csvRegex);
 
           if (csvMatch) {
@@ -1303,7 +1304,7 @@ export async function addSignToTaskInFile(
             }
           } else {
             // Check for individual style stop signs and convert to CSV
-            const individualRegex = /⛔\s*([a-zA-Z0-9]{6})/g;
+            const individualRegex = /⛔\s*([a-zA-Z0-9_-]+)/g;
             const individualMatches = Array.from(
               lines[taskLineIdx].matchAll(individualRegex)
             );
@@ -1575,6 +1576,7 @@ function parseTaskNote(
 
     // For note-based tasks, use the file path as the ID
     task.id = file.path;
+    task.idOrigin = "note";
 
     // Override with frontmatter data if available
     if (frontmatter.tags) {

@@ -20,6 +20,7 @@ import {
   getTaskDateProperties,
 } from "../src/lib/utils";
 import { NoteTask } from "../src/types/note-task";
+import { TaskFactory } from "../src/lib/task-factory";
 import { App, Vault } from "./mocks/obsidian";
 
 function makeTask(
@@ -500,6 +501,26 @@ describe("createEdgesFromTasks", () => {
     expect(edges[0].target).toBe("B");
   });
 
+  it("connects a Jira-derived task through a manually written dependency", () => {
+    const factory = new TaskFactory();
+    const source = factory.parse({
+      status: " ",
+      text: "JIRA:TILE-1234",
+      link: { path: "tasks.md" },
+    });
+    const target = factory.parse({
+      status: " ",
+      text: "Follow-up ⛔ TILE-1234",
+      link: { path: "tasks.md" },
+    });
+
+    const edges = createEdgesFromTasks([source, target]);
+
+    expect(edges).toHaveLength(1);
+    expect(edges[0].source).toBe("TILE-1234");
+    expect(edges[0].target).toBe(target.id);
+  });
+
   it("creates multiple edges for multiple dependencies", () => {
     const tasks = [
       makeTask({ id: "A", incomingLinks: [] }),
@@ -797,6 +818,35 @@ describe("addSignToTaskInFile", () => {
     expect(vault.getFileContent("tasks/test.md")).toContain("[id:: abc123]");
   });
 
+  it("keeps a Jira-derived ID virtual", async () => {
+    const initial = "- [ ] JIRA:TILE-1234";
+    const vault = makeVault(initial);
+    const task = makeTask({
+      id: "TILE-1234",
+      idOrigin: "jira",
+      text: "JIRA:TILE-1234",
+      link: "tasks/test.md",
+    });
+
+    await addSignToTaskInFile(vault as any, task, "id", "TILE-1234");
+
+    expect(vault.getFileContent("tasks/test.md")).toBe(initial);
+  });
+
+  it("still writes dependencies to a Jira-derived task", async () => {
+    const vault = makeVault("- [ ] JIRA:TILE-5678");
+    const task = makeTask({
+      id: "TILE-5678",
+      idOrigin: "jira",
+      text: "JIRA:TILE-5678",
+      link: "tasks/test.md",
+    });
+
+    await addSignToTaskInFile(vault as any, task, "stop", "TILE-1234");
+
+    expect(vault.getFileContent("tasks/test.md")).toContain("⛔ TILE-1234");
+  });
+
   it("skips adding ID if emoji ID already present", async () => {
     const initial = "- [ ] Test task 🆔 abc123";
     const vault = makeVault(initial);
@@ -839,6 +889,21 @@ describe("addSignToTaskInFile", () => {
     );
   });
 
+  it("appends to a dataview dependency list containing a Jira ID", async () => {
+    const vault = makeVault("- [ ] Test task [dependsOn:: TILE-1234]");
+    const task = makeTask({ text: "Test task", link: "tasks/test.md" });
+    await addSignToTaskInFile(
+      vault as any,
+      task,
+      "stop",
+      "NVVM-5678",
+      "dataview"
+    );
+    expect(vault.getFileContent("tasks/test.md")).toContain(
+      "[dependsOn:: TILE-1234, NVVM-5678]"
+    );
+  });
+
   it("creates CSV stop sign when linkingStyle is csv and no existing stop signs", async () => {
     const vault = makeVault("- [ ] Test task");
     const task = makeTask({ text: "Test task", link: "tasks/test.md" });
@@ -851,6 +916,21 @@ describe("addSignToTaskInFile", () => {
     const task = makeTask({ text: "Test task", link: "tasks/test.md" });
     await addSignToTaskInFile(vault as any, task, "stop", "def456", "csv");
     expect(vault.getFileContent("tasks/test.md")).toContain("⛔ abc123,def456");
+  });
+
+  it("appends to a CSV dependency list containing a Jira ID", async () => {
+    const vault = makeVault("- [ ] Test task ⛔ TILE-1234");
+    const task = makeTask({ text: "Test task", link: "tasks/test.md" });
+    await addSignToTaskInFile(
+      vault as any,
+      task,
+      "stop",
+      "NVVM-5678",
+      "csv"
+    );
+    expect(vault.getFileContent("tasks/test.md")).toContain(
+      "⛔ TILE-1234,NVVM-5678"
+    );
   });
 
   it("returns early when task has no link", async () => {

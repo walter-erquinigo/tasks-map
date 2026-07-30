@@ -1,5 +1,6 @@
 import { Vault, App } from "./mocks/obsidian";
 import { DataviewTask } from "../src/types/dataview-task";
+import { TaskFactory } from "../src/lib/task-factory";
 
 function makeDataviewTask(
   overrides: Partial<ConstructorParameters<typeof DataviewTask>[0]> = {}
@@ -86,6 +87,23 @@ describe("DataviewTask", () => {
       const task = makeDataviewTask({ text: "" });
       await task.updateStatus("done", app);
       // Should not throw
+    });
+
+    it("updates a Jira-derived task without materializing its ID", async () => {
+      const content = "- [ ] JIRA:TILE-1234";
+      vault.setFileContent("tasks/test.md", content);
+      const task = new TaskFactory().parse({
+        status: " ",
+        text: "JIRA:TILE-1234",
+        link: { path: "tasks/test.md" },
+      });
+
+      await task.updateStatus("done", app);
+
+      const updated = vault.getFileContent("tasks/test.md");
+      expect(updated).toMatch(/^- \[x\].*JIRA:TILE-1234/);
+      expect(updated).not.toContain("🆔");
+      expect(updated).not.toContain("[id::");
     });
   });
 
@@ -205,6 +223,31 @@ describe("DataviewTask", () => {
 
       const updated = vault.getFileContent("tasks/test.md");
       expect(updated).not.toContain("#urgent");
+    });
+  });
+
+  describe("addLinkMetadata", () => {
+    it("uses a Jira-derived ID without adding redundant source metadata", async () => {
+      const content = "- [ ] JIRA:TILE-1234\n- [ ] Follow-up";
+      vault.setFileContent("tasks/test.md", content);
+      const factory = new TaskFactory();
+      const fromTask = factory.parse({
+        status: " ",
+        text: "JIRA:TILE-1234",
+        link: { path: "tasks/test.md" },
+      });
+      const toTask = factory.parse({
+        status: " ",
+        text: "Follow-up",
+        link: { path: "tasks/test.md" },
+      });
+
+      await toTask.addLinkMetadata(vault as any, fromTask);
+
+      const updated = vault.getFileContent("tasks/test.md");
+      expect(updated).toContain("- [ ] JIRA:TILE-1234");
+      expect(updated).not.toContain("🆔 TILE-1234");
+      expect(updated).toContain("- [ ] Follow-up ⛔ TILE-1234");
     });
   });
 });

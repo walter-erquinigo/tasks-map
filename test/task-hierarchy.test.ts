@@ -82,6 +82,17 @@ describe("addImplicitNestingDependencies", () => {
 
     expect(child.task.incomingLinks).toEqual(["parent"]);
   });
+
+  it("uses a virtual Jira ID for an inferred nesting dependency", () => {
+    const parent = makeEntry("JIRA:TILE-1234", 4);
+    const child = makeEntry("Nested child", 5, 4);
+
+    addImplicitNestingDependencies([parent, child]);
+
+    expect(parent.task.id).toBe("TILE-1234");
+    expect(parent.task.idOrigin).toBe("jira");
+    expect(child.task.incomingLinks).toEqual(["TILE-1234"]);
+  });
 });
 
 describe("getAllDataviewTasks", () => {

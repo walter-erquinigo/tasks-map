@@ -2,6 +2,7 @@ import { App, Vault } from "obsidian";
 import { TaskStatus } from "./task";
 
 export type TaskInsertPosition = "before" | "after";
+export type TaskIdOrigin = "explicit" | "jira" | "generated" | "note";
 
 /**
  * Abstract base class for tasks.
@@ -9,6 +10,7 @@ export type TaskInsertPosition = "before" | "after";
  */
 export abstract class BaseTask {
   id: string;
+  idOrigin: TaskIdOrigin;
   abstract readonly type: "dataview" | "note";
   summary: string;
   text: string;
@@ -24,6 +26,7 @@ export abstract class BaseTask {
 
   constructor(data: {
     id: string;
+    idOrigin?: TaskIdOrigin;
     summary: string;
     text: string;
     tags: string[];
@@ -37,6 +40,7 @@ export abstract class BaseTask {
     ownerConflict?: boolean;
   }) {
     this.id = data.id;
+    this.idOrigin = data.idOrigin ?? "explicit";
     this.summary = data.summary;
     this.text = data.text;
     this.tags = data.tags;
@@ -109,6 +113,7 @@ export abstract class BaseTask {
   toPlainObject() {
     return {
       id: this.id,
+      idOrigin: this.idOrigin,
       type: this.type,
       summary: this.summary,
       text: this.text,

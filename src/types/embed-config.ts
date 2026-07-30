@@ -16,7 +16,7 @@ export const DEFAULT_EMBED_CONFIG: EmbedConfig = {
   showFilterPanel: true,
   showPresetsPanel: true,
   showUnlinkedPanel: true,
-  hideUnlinkedTasks: true,
+  hideUnlinkedTasks: false,
   showStatusCounts: true,
   showViewPanel: true,
   hideTagsOnNodes: false,
